@@ -56,22 +56,16 @@
 \newcommand{\rem}[1]{}
 
 \begin{document}
-\logo{
-\includegraphics[height=0.7cm]{./logo/nyp-logo-int.png} 
-\hspace{260pt}
-\vspace{230pt}
-
-}
 \lstset{language=python}
 
-\title{ITD302 \\ Massively Parallel Computing for Big Data \\
-  Introduction to Spark} 
+\title{ Introduction to Spark} 
 \author{ \white 
- Copyright \copyright~ 2015 Nanyang Polytechnic. All Rights Reserved
- % Kenny Zhuo Ming Lu 
+ Copyright \copyright~ 2015. All Rights Reserved
+Kenny Zhuo Ming Lu 
 }
 \institute{
 \normalsize 
+Kenny Lu \\ 
 School of Information Technology \\ Nanyang Polytechnic
 }
 \date{\today} 
@@ -82,18 +76,6 @@ School of Information Technology \\ Nanyang Polytechnic
 \frame{\titlepage} 
 
 %\frame{\frametitle{Table of contents}\tableofcontents} 
-
-
-\begin{frame}
-\frametitle{Learning Outcomes}
-
-\begin{itemize}
-  \item Describe and explain the concepts, features and
-    functionalities of Spark.
-  \item Develop real-time scalable in memory data transformation and
-    analytics application using Spark.
-\end{itemize}
-\end{frame}
 
 
 %-------------------------------------------------------------------
@@ -157,12 +139,17 @@ Task  & Jobs & Jobs \\ \hline
 \includegraphics[scale=0.5]{pic/spark.png}
 \end{figure}
 
+A SparkContext is an interface between the Spark Driver Program
+  (application) and the Spark runtime-system
+
 \end{frame}
+
+
 
 %-------------------------------------------------------------------
 %-------------------------------------------------------------------
 \begin{frame}[fragile]
-\frametitle{A use case}
+\frametitle{WordCount Example in Spark}
 
 \beb{Wordcount in Scala} 
 \begin{code}
@@ -181,13 +168,125 @@ counts = lines.flatMap(lambda x: x.split(' ')) \
               .reduceByKey(add)
 couts.saveAsTextFile("hdfs://127.0.0.1:9000/output/")
 \end{code} \eeb
-{\tt sc} denotes SparkContext
+{\tt sc} denotes SparkContext 
+\end{frame}
+
+
+
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{WordCount Example in Spark}
+
+\beb{Wordcount in Scala} 
+\begin{code}
+val lines:RDD[String] = 
+    sc.textFile("hdfs://127.0.0.1:9000/input/")
+val counts:RDD[(String,Long)] = 
+    lines.flatMap(line => line.split(" "))
+    .map(word => (word, 1))
+    .reduceByKey(_ + _)
+counts.saveAsTextFile("hdfs://127.0.0.1:9000/output/")
+\end{code} \eeb
+Recall in Scala {\tt  List(1,2,3).map( v => v + 1) }
+yields  {\tt List(2,3,4) } \\ 
+and {\tt List([1],[2],[3]).flatMap( l => l ) } 
+yields
+{\tt List(1,2,3) }
+\\
+An RDD can be seen as a distributed list. 
+\end{frame}
+
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{Resilient Distributed Dataset}
+
+\begin{itemize} 
+\item RDD is an abstraction over a collection of data set being distributed
+and partitioned across a cluster of worker machines, mostly in memory.
+\item Programmers are not required to manage or to coordinate that
+distributed and partitioned. RDD is fault tolerant.  
+\item RDDs are initialized and managed by the SparkContext.
+\end{itemize}
+\end{frame}
+
+
+
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+
+
+\begin{frame}[fragile]
+\frametitle{RDD transformations are pure}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[scale=0.5]{pic/spark-rdd-partition-and-spark-rdd-architecture.png}
+\end{figure}
+\footnote{Image adapted from {\tt http://www.hadooptpoint.com/wp-content/uploads/2016/07/spark-rdd-partition-and-spark-rdd-architecture.png}}
+
+\begin{itemize}
+\item {\tt .map( f )} and {\tt .flatMap( f )} applies {\tt f } to
+  elements in the RDD.
+\item {\tt .filter( f )} filters away elements {\tt x} which {\tt
+    f(x)} yields false.
+\item {\tt reduceByKey(f)} will shuffle and group by keys, exploiting
+  locality if possible.
+\end{itemize}
 \end{frame}
 
 
 
 %-------------------------------------------------------------------
 %-------------------------------------------------------------------
+
+
+\begin{frame}[fragile]
+\frametitle{RDD transformations are lazy}
+
+\begin{itemize}
+\item Computations do not take place unless the results are needed.
+\item In memory cache are explicitly created.
+\end{itemize}
+\beb{Wordcount in Scala} 
+\begin{code}
+val lines:RDD[String] = 
+    sc.textFile("hdfs://127.0.0.1:9000/input/")
+val counts:RDD[(String,Long)] = 
+    lines.flatMap(line => line.split(" "))
+    .map(word => (word, 1))
+    .reduceByKey(_ + _)
+counts.persist() // caching
+counts.saveAsTextFile("hdfs://127.0.0.1:9000/output/")
+val somethingelse = counts.map( ... )
+\end{code} \eeb
+
+\end{frame}
+
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+
+
+\begin{frame}[fragile]
+\frametitle{RDD transformations are resilient to node failure}
+
+Since computations are pure, hence they are deterministic. 
+Final results and intermediate results can be always recomputed.
+\end{frame}
+
+
+
+
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+
+
 
 \begin{frame}[fragile]
 \frametitle{How to run it?}
@@ -243,7 +342,6 @@ It supports R too.
 
 %-------------------------------------------------------------------
 %-------------------------------------------------------------------
-
 
 
 
