@@ -1,0 +1,251 @@
+\documentclass{beamer}
+%% fink install texlive
+\usetheme{Warsaw}
+
+\usepackage{amsmath,amssymb}
+\usepackage{stmaryrd}
+\usepackage{graphicx}
+%\usepackage{haskell}
+\usepackage{code}
+%\usepackage{proof}
+\usepackage{theorem}
+\usepackage{pstricks} 
+\usepackage{listings}
+\usepackage{pgf-pie} % from https://code.google.com/p/pgf-pie/
+
+
+\include{macros-ms}
+
+\newcommand{\beb}{\begin{exampleblock}}
+\newcommand{\eeb}{\end{exampleblock}}
+
+
+\newcommand{\rev}[1]{{#1}^{\mbox{\scriptsize r}}}
+\newcommand{\lquo}{\backslash}
+\newcommand{\rquo}{/}
+\newcommand{\diff}{-}
+\newcommand{\isect}{\cap}
+\newcommand{\mymid}{~\redtxt{\mid}~}
+
+\newcommand{\ignore}[1]{}
+
+\newcommand{\magtxt}[1]{{\magenta #1}}
+\newcommand{\redtxt}[1]{{\red #1}}
+\newcommand{\bluetxt}[1]{{\blue #1}}
+\newcommand{\greytxt}[1]{{\gray #1}}
+\newcommand{\mmleq}{\leq}
+\newcommand{\pow}{\^{}}
+\newcommand{\venv}{\Delta}
+\newcommand{\mleq}{\mbox{\tt leq}}
+\newcommand{\mas}{\mbox{\tt as}}
+\newcommand{\subt}{<\!:}
+
+\newcommand{\Nturns}{\, \vdash_{\mbox{\tiny lnf}} \,}
+
+\newenvironment{ttprog}{\begin{trivlist}\item \tt
+        \begin{tabbing}}{\end{tabbing}\end{trivlist}}
+
+
+\newenvironment{grammar}{%
+         \begin{center} \small%
+         $\begin{array}{rcll}
+         }{%
+         \end{array}$\end{center}\ignorespaces%
+         }
+
+\newcommand{\rem}[1]{}
+
+\begin{document}
+
+\title{Introduction to Spark Machine Learning} 
+\author{ \white 
+ Copyright \copyright~ 2015. All Rights Reserved
+Kenny Zhuo Ming Lu 
+}
+\institute{
+\normalsize 
+Kenny Lu \\ 
+School of Information Technology \\ Nanyang Polytechnic
+}
+\date{\today} 
+
+
+%\bibliographystyle{plainnat}
+
+\frame{\titlepage} 
+
+%\frame{\frametitle{Table of contents}\tableofcontents} 
+
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+\begin{frame}
+\frametitle{What is Spark Machine Learning?}
+\begin{itemize}
+\item A library of tools developed for machine learning
+\item Built over the Apache Spark framework
+\end{itemize}
+\end{frame}
+
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+\begin{frame}
+\frametitle{Why Spark Machine Learning?}
+
+\begin{itemize}
+ \item Scalable
+ \item Compatibility (Java, R, Python, Scala)
+ \item Data integration (HDFS, Cassendra, ...)
+\end{itemize}
+\end{frame}
+
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{Spark Machine Learnng Data Types}
+\begin{itemize}
+\item RDD
+\item Vector
+\item Labeled Points
+\item Matrix
+\end{itemize}  
+\end{frame}
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{Resilient Distributed Dataset}
+
+\begin{itemize} 
+\item RDD is an abstraction over a collection of data set being distributed
+and partitioned across a cluster of worker machines, mostly in memory.
+\item Programmers are not required to manage or to coordinate that
+distributed and partitioned. RDD is fault tolerant.  
+\item RDDs are initialized and managed by the SparkContext.
+\end{itemize}
+\end{frame}
+
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{Resilient Distributed Dataset}
+
+\beb{scala}
+\begin{code}
+val sc = new SparkContext("local", "shell")	
+// an RDD of doubles 
+val seriesX:RDD[Double] = sc
+  .textFile("data/basic/series1.txt")
+  .map(_.toDouble)
+\end{code}
+\eeb
+\end{frame}
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+
+
+\begin{frame}[fragile]
+\frametitle{RDD transformations are pure}
+
+Recall from the previous section. Let {\tt r} denotes an RDD,
+\begin{itemize}
+\item {\tt r.map(f)} and {\tt r.flatMap(f)} applies {\tt f} to
+  elements in {\tt r}.
+\item {\tt r.filter(f)} filters away elements {\tt x} in {\tt r} which {\tt
+    f(x)} yields {\tt false}.
+\item assuming {\tt r} is a collection of key-value pairs, {\tt r.reduceByKey(f)} will
+  shuffle the pairs and group them by keys. The values grouped under the same key will be
+  reduced by {\tt f}. Data locality is exploit when possible.
+\end{itemize}
+
+\end{frame}
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+
+
+\begin{frame}[fragile]
+\frametitle{Localizing an RDD}
+
+\beb{scala}
+\begin{code}
+val sc = new SparkContext("local", "shell")	
+// an RDD of doubles 
+val seriesX:RDD[Double] = sc
+  .textFile("data/basic/series1.txt")
+  .map(_.toDouble)
+val arr:Array[Double] = seriesX.toArray
+\end{code}
+\eeb
+
+\end{frame}
+
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+
+
+\begin{frame}[fragile]
+\frametitle{Localizing an RDD}
+
+\beb{scala}
+\begin{code}
+val sc = new SparkContext("local", "shell")	
+// an RDD of doubles 
+val seriesX:RDD[Double] = sc
+  .textFile("data/basic/series1.txt")
+  .map(_.toDouble)
+val arr:Array[Double] = seriesX.toArray
+\end{code}
+\eeb
+
+\end{frame}
+
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+
+
+\begin{frame}[fragile]
+\frametitle{Vector}
+
+Vectors are local data collection.
+\begin{itemize}
+\item Dense vector - similar to an array. All values need to be specified.
+\beb
+\begin{code}
+// Create a dense vector (1.0, 0.0, 3.0).
+val dv: Vector = Vectors.dense(1.0, 0.0, 3.0)
+\end{code}
+\eeb
+\item Sparse vector - programmers are required to specify the size and dimension of the vectors,
+  as well as the non-zero values.
+  
+\end{itemize}
+\end{frame}
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+
+
+\begin{frame}[fragile]
+\frametitle{Vector}
+
+A dense vector is backed by a double array representing its entry values, 
+while a sparse vector is backed by two parallel arrays: indices and values. 
+For example, a vector (1.0, 0.0, 3.0) can be represented in dense format as [1.0, 0.0, 3.0] 
+or in sparse format as (3, [0, 2], [1.0, 3.0]), where 3 is the size of the vector.
+\beb
+\begin{code}
+// Create a dense vector (1.0, 0.0, 3.0).
+val dv: Vector = Vectors.dense(1.0, 0.0, 3.0)
+\end{code}
+\eeb
+\end{frame}
+
+
+\end{document}
