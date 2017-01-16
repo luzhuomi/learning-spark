@@ -193,7 +193,7 @@ counts.saveAsTextFile("hdfs://127.0.0.1:9000/output/")
 \end{code} \eeb
 Recall in Scala {\tt  List(1,2,3).map( v => v + 1) }
 yields  {\tt List(2,3,4) } \\ 
-and {\tt List([1],[2],[3]).flatMap( l => l ) } 
+and {\tt List(List(1),List(2),List(3)).flatMap( l => l ) } 
 yields
 {\tt List(1,2,3) }
 \\
@@ -229,16 +229,33 @@ distributed and partitioned. RDD is fault tolerant.
 \centering
 \includegraphics[scale=0.5]{pic/spark-rdd-partition-and-spark-rdd-architecture.png}
 \end{figure}
-\footnote{Image adapted from {\tt http://www.hadooptpoint.com/wp-content/uploads/2016/07/spark-rdd-partition-and-spark-rdd-architecture.png}}
+Image adapted from {\tt http://www.hadooptpoint.com}
 
+\end{frame}
+
+
+
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+
+
+\begin{frame}[fragile]
+\frametitle{RDD transformations are pure}
+
+
+
+Let {\tt r} denotes an RDD,
 \begin{itemize}
-\item {\tt .map( f )} and {\tt .flatMap( f )} applies {\tt f } to
-  elements in the RDD.
-\item {\tt .filter( f )} filters away elements {\tt x} which {\tt
-    f(x)} yields false.
-\item {\tt reduceByKey(f)} will shuffle and group by keys, exploiting
-  locality if possible.
+\item {\tt r.map(f)} and {\tt r.flatMap(f)} applies {\tt f} to
+  elements in {\tt r}.
+\item {\tt r.filter(f)} filters away elements {\tt x} in {\tt r} which {\tt
+    f(x)} yields {\tt false}.
+\item assuming {\tt r} is a collection of key-value pairs, {\tt r.reduceByKey(f)} will
+  shuffle the pairs and group them by keys. The values grouped under the same key will be
+  reduced by {\tt f}. Data locality is exploit when possible.
 \end{itemize}
+
 \end{frame}
 
 
