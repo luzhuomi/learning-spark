@@ -141,7 +141,7 @@
 \begin{enumerate}
    \item Start the Spark cluster
 \begin{code}
-$/opt/spark-1.5.2-bin-hadoop2-hive2-r/sbin/start-all.sh
+$ /opt/spark-1.5.2-bin-hadoop2-hive2-r/sbin/start-all.sh
 \end{code}
 %$
    \item We are going to transform some data from HDFS. 
@@ -214,7 +214,7 @@ $ sbt package
 %$
 \item To execute the code
 \begin{code}
-$ /opt/spark-1.5.2-bin-hadoop2.6-hive-r/bin/spark-submit  --class SimpleApp \
+$ /opt/spark-1.5.2-bin-hadoop2-hive2-r/bin/spark-submit  --class SimpleApp \
 target/scala-2.10/spark-examples_2.10-0.1.0.jar
 \end{code}
 %$
@@ -314,7 +314,7 @@ $ sbt package
 %$
 \item To execute the code
 \begin{code}
-$ /opt/spark-1.5.2-bin-hadoop2.6-hive-r/bin/spark-submit  --class Transform \
+$ /opt/spark-1.5.2-bin-hadoop2-hive2-r/bin/spark-submit  --class Transform \
 target/scala-2.10/spark-examples_2.10-0.1.0.jar
 \end{code}
 %$
@@ -386,7 +386,7 @@ the main jar.
 
 \item To execute 
 \begin{code}
-$ /opt/spark-1.5.2-bin-hadoop2.6-hive-r/bin/spark-submit --class Extract\ 
+$ /opt/spark-1.5.2-bin-hadoop2-hive2-r/bin/spark-submit --class Extract\ 
 target/scala-2.10/spark-examples-assembly-0.1.0.jar
 \end{code}
 %$
