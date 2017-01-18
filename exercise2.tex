@@ -281,6 +281,14 @@ object TweetSVMFilter {
   }
 }
 \end{code}
+The {\tt hash} function hashes a string value into an integer.
+The {\tt to\_words} function turns a sentence into words.
+The {\tt pad\_cap} function takes a list of double values as input {\tt xs} and
+a size {\tt size}. If the size of the input
+list exceeds the given size, it truncates the input list down to the size.
+If the size of the input falls below {\tt size}, it pads the remaining spaces with zeros.
+This is to ensure all vectors to the SVM have the same size.
+In the {\tt main} function, we first load the labeled data from the HDFS.
 
 
 \end{document}
