@@ -1,0 +1,191 @@
+\documentclass[10pt]{article}
+
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{code}
+\usepackage{graphicx}
+
+\usepackage{listings}
+
+
+
+\usepackage[english]{babel}
+%\usepackage{blindtext}
+%\usepackage{fontspec}
+%\setmainfont{Arial}
+
+%\renewcommand{\familydefault}{\sfdefault}
+%\usepackage{blindtext}
+\pagenumbering{arabic}  % Arabic page numbers GM July 2000
+
+\usepackage{authoraftertitle}
+\usepackage{fancyhdr}
+% Clear the header and footer
+\fancyhead{}
+\fancyfoot{}
+%\lhead{\includegraphics[height=0.7cm]{../logo/nyp-logo-int.png} }
+\rhead{\scriptsize \MyTitle}
+%\lfoot{\scriptsize Specialist Diploma in Business \& Big Data Analytics
+%  \\ Copyright
+ % \copyright\ Nanyang Polytechnic. All Rights Reserved.}
+\rfoot{\thepage}
+\pagestyle{fancy}
+
+
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\textfraction}{0.02}
+\renewcommand{\floatpagefraction}{0.95}
+
+
+\bibliographystyle{plain}
+
+%%\textwidth      150mm \textheight     210mm \oddsidemargin  -2mm \evensidemargin -2mm
+
+\renewcommand{\baselinestretch}{0.987}
+
+\setlength{\parskip}{0.0in}
+
+%\input{macros-ms}
+
+\newcommand{\Nturns}{\, \vdash_{\mbox{\scriptsize lnf}} \,}
+
+\newcommand{\tr}[1]{}
+%%\newcommand{\tr}[1]{#1}
+%%\newcommand{\nottr}[1]{#1}
+\newcommand{\nottr}[1]{}
+
+%\newcommand{\implies}{\supset}
+\newcommand{\clabel}[1]{\mbox{(#1)}}
+\newcommand{\rat}[1]{\rightarrowtail_{#1}}
+\newcommand{\arr}{\rightarrow}
+\newcommand{\arrow}{\rightarrow}
+\newcommand{\Arr}{\Rightarrow}
+\newcommand{\atsign}{@}
+\newcommand{\simparrow}[0]{\Longleftrightarrow}
+\newcommand{\proparrow}[0]{\Longrightarrow}
+\newcommand{\comment}[1]{}
+\newcommand{\ignore}[1]{}
+%\newcommand{\kl}[1]{{\bf KL:#1}} %%%{\marginpar{\sc kl}{\bf #1}}
+\newcommand{\kl}[1]{}
+\newcommand{\ms}[1]{{\bf MS:#1}}       %%{\marginpar{\sc ms}{\bf #1}}
+%%\newcommand{\jw}[1]{\marginpar{\sc jw}{\bf #1}}
+\newcommand{\pjs}[1]{}
+%%\newcommand{\ms}[1]{}
+\newcommand{\jw}[1]{}
+%%\newcommand{\kl}[1]{}
+
+
+\newcommand{\pow}{\^{}}
+\newcommand{\venv}{\Delta}
+\newcommand{\mleq}{\mbox{\tt leq}}
+\newcommand{\mmleq}{\leq}
+\newcommand{\mas}{\mbox{\tt as}}
+\newcommand{\mfix}{\mu}
+
+\newcommand{\mysection}[1]{\vspace*{-2mm}\section{#1}\vspace*{-1mm}}
+\newcommand{\mysubsection}[1]{\vspace*{-1mm}\subsection{#1}\vspace*{-1mm}}
+
+\newcounter{cnt}
+\newtheorem{ex}{Example}
+%\newenvironment{example}{
+%        \begin{ex}\rm}%
+%    {\hfill$\Box$\end{ex}}
+
+\newenvironment{nexample}{
+        \begin{ex}\rm}%
+        {\end{ex}}
+
+%%\newtheorem{rem}{Remark}
+%%\renewenvironment{remark}{
+%%        \begin{rem}\rm}%
+%%    {\hfill$\Box$\end{rem}}
+
+%%\newenvironment{myexample}{
+%%        \begin{ex}\rm}%
+%%  {\hfill $\Diamond$\end{ex}}
+%\newenvironment{example}{
+%        \begin{example}\rm}%
+%    {\end{example}}
+
+\newenvironment{ttline}{\begin{trivlist}\item \tt}{\end{trivlist}}
+\newenvironment{ttprog}{\begin{trivlist}\small\item \tt
+        \begin{tabbing}}{\end{tabbing}\end{trivlist}}
+
+
+\newcommand{\figcode}[1]
+        {\begin{figure*}[t]#1
+        \end{figure*}}
+
+
+\title{Introduction to Spark Machine Learning}
+%\author{Kenny Zhuo Ming Lu\\
+%  \multicolumn{1}{p{.7\textwidth}}{\centering
+%  \emph{School of Information Technology \\ Nanyang Polytechnic \\
+%    180 Ang Mo Kio Avenue 8, Singapore 569830}}
+%}
+
+
+\begin{document}
+\maketitle \makeatactive
+\thispagestyle{fancy}
+
+%\lstset{language=scala}
+
+%\begin{abstract}
+%\end{abstract}
+
+
+
+\section{Exercises }
+
+\begin{enumerate}
+   \item Start the Spark cluster
+\begin{code}
+$/opt/spark-1.5.2-bin-hadoop2-hive2-r/sbin/start-all.sh
+\end{code}
+%$
+   \item We are going to transform some data from HDFS. 
+   \item Start Hadoop. In the VM, start a terminal and run the following command
+\begin{code}
+$ start-dfs.sh && start-yarn.sh
+\end{code} %$
+   \item Check out the source codes.
+           \begin{enumerate}
+               \item If you find the {\tt \~{}/git/scala-bigdata-starter/} folder exists in your system, 
+\begin{code}
+$ cd ~/git/scala-bigdata-starter
+$ git pull
+\end{code}
+               \item otherwise, clone it from github.
+\begin{code}
+$ cd ~
+$ mkdir git
+$ cd git 
+$ git clone http://github.com/luzhuomi/scala-bigdata-starter.git
+$ cd scala-bigdata-starter
+\end{code}
+%$
+             \end{enumerate}
+ \item Change to the following folder
+\begin{code}
+$ cd ~/git/scala-bigdata-starter/spark-examples/
+\end{code}
+%$
+
+\end{enumerate}
+
+\subsection{Tweet classifier}
+
+The school have collected some twitter data on Joint Admission
+Exercise (in Singapore). They are often mentioned in the short form
+``jae''. However the twitter data collector can only specify the
+keyword ``jae'', we are looking the admision exercise related data yet
+we are observing data talking about KPOP. (Because there are many
+Korean celebrities having ``jae'' as part of their names.) The task
+here is to build a classifier to differentiate the KPOP tweets
+mentioning ``jae'' as a person's name or otherwise.
+
+
+
+
+\end{document}
