@@ -168,7 +168,7 @@ $ cd scala-bigdata-starter
              \end{enumerate}
  \item Change to the following folder
 \begin{code}
-$ cd ~/git/scala-bigdata-starter/spark-examples/
+$ cd ~/git/scala-bigdata-starter/spark-ml-examples/
 \end{code}
 %$
 
@@ -176,16 +176,111 @@ $ cd ~/git/scala-bigdata-starter/spark-examples/
 
 \subsection{Tweet classifier}
 
-The school have collected some twitter data on Joint Admission
-Exercise (in Singapore). They are often mentioned in the short form
-``jae''. However the twitter data collector can only specify the
-keyword ``jae'', we are looking the admision exercise related data yet
-we are observing data talking about KPOP. (Because there are many
-Korean celebrities having ``jae'' as part of their names.) The task
-here is to build a classifier to differentiate the KPOP tweets
+The school have collected some twitter data on the keyword ``jae''. 
+However the term ``jae'' could refer to some 
+Korean celebrities having ``jae'' as part of their names, or to joint
+admission exercise in Singapore. 
+The task here is to build a classifier to differentiate the KPOP tweets
 mentioning ``jae'' as a person's name or otherwise.
 
+For example, the following tweet message falls into the category of
+Korean Pop because it seems talking about a person's name 
+\begin{code}
+crazy cool   jae s lee's pic of street singer reflected in raindrops
+ tuesday on 2nd ave  
+\end{code}
+%
+On the other hand, the following tweet is not revelant to KPOP. 
+\begin{code}
+accident closes jae valley rd drivers advised to avoid area seek 
+alternate routes
+\end{code}
+%
+To achieve the goal, we need to develop a classifier, which is a
+supervised machine learning technique. In this example, we consider
+using Support Vector Machine (SVM) as the classifier
+algorithm. On the higher level, we need to ``train'' the model with
+some manually labelled data and perform some tests against the trained
+model. As part of the input requirement the SVM expect the input data
+to represented as a label (either yes or no, 1 or 0) accompanied by
+the feature vector. The feature vector is a vector of values which
+uniquely differentiate one entry from another ideally.  In the machine
+learning context, features have to be fixed by the programmers. 
 
+For the ease of illustration, we use a vector of hash codes derived
+from the words appearing in the tweet.  Consider the following source
+code in {\tt src/main/scala/TweetSVMFilter.scala} 
+
+\begin{code}
+object TweetSVMFilter {
+
+  val vector_fixed_size = 30 
+  // fixed the size of each vector. 
+  // if vectors have different sizes, the gradient descent algorithm will fail
+  // cut off if it exceeds, pad zeros if it has less than 30 elements
+
+  def hash(str:String):Int = str.toList.foldLeft(2147483647)((h,c) => 31*h + c)
+  
+  def to_words(tweet:String):List[String] = tweet.split(" ").toList
+
+  def pad_cap(xs:List[Double],size:Int):List[Double] = xs match 
+  {
+    case Nil if size > 0 => List.fill(size)(0.0) // fill the rest with 0.0
+    case Nil             => Nil 
+    case (y::ys) if size == 0 => Nil
+    case (y::ys)              => y::(pad_cap(ys,size-1))
+  }
+
+  def main(args: Array[String]) {
+     
+    // cluster mode
+    val conf = new SparkConf().setAppName("Spark SVM")
+    val sc = new SparkContext(conf)
+    val posTXT:RDD[String] = sc
+      .textFile("hdfs://127.0.0.1:9000/data/tweet/label_data/Kpop/*.txt") 
+    val negTXT:RDD[String] = sc
+      .textFile("hdfs://127.0.0.1:9000/data/tweet/label_data/othertweet/*.txt") 
+    
+    // convert the training data to labeled points
+    val posLP:RDD[LabeledPoint] = posTXT.map( (twt:String) => 
+    {
+      val ws = to_words(twt).map(w => hash(w).toDouble)
+      LabeledPoint(1.0, Vectors.dense(pad_cap(ws ,vector_fixed_size).toArray))
+    })
+    val negLP:RDD[LabeledPoint] = negTXT.map( (twt:String) => 
+    { 
+      val ws = to_words(twt).map(w => hash(w).toDouble)
+      LabeledPoint(0.0, Vectors.dense(pad_cap(ws ,vector_fixed_size).toArray))
+    })
+    val data = negLP ++ posLP
+
+    // Split data into training (60%) and test (40%).
+    val splits = data.randomSplit(Array(0.6, 0.4), seed = 11L)
+    val training = splits(0).cache()
+    val test = splits(1)
+
+    // Run training algorithm to build the model
+    val numIterations = 100
+    val model = SVMWithSGD.train(training, numIterations)
+
+    // Clear the default threshold.
+    model.clearThreshold()
+
+    // Compute raw scores on the test set. 
+    val scoreAndLabels = test.map { point =>
+      val score = model.predict(point.features)
+      (score, point.label)
+    }
+
+    // Get evaluation metrics.
+    val metrics = new BinaryClassificationMetrics(scoreAndLabels)
+    val auROC = metrics.areaUnderROC()
+
+    println("Area under ROC = " + auROC)	
+    sc.stop
+  }
+}
+\end{code}
 
 
 \end{document}
