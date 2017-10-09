@@ -179,7 +179,7 @@ val sc = new SparkContext("local", "shell")
 val seriesX:RDD[Double] = sc
   .textFile("data/basic/series1.txt")
   .map(_.toDouble)
-val arr:Array[Double] = seriesX.toArray
+val arr:Array[Double] = seriesX.collect.toArray
 \end{code}
 \eeb
 
@@ -379,6 +379,62 @@ val cmat: CoordinateMatrix = new CoordinateMatrix(entries)
 
 \end{frame}
 
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+\begin{frame}[fragile]
+\frametitle{Machine learning Models}
+With above data types, we can build and use many interesting models.
+Spark ML comes with many builtin models, 
+\begin{itemize}
+\item Classification
+  \begin{itemize}
+  \item Logistic Regression
+  \item SVM
+  \item NaiveBayse
+  \end{itemize}
+\item Clustering
+  \begin{itemize}
+     \item KMeans
+     \item LDA
+  \end{itemize}
+\item Regression
+   \begin{itemize}
+     \item Linear Regression
+   \end{itemize}
+\item Other algorithms
+   \begin{itemize}
+     \item PCA
+     \item NGram
+     \item Word2Vec
+   \end{itemize}
+
+\end{itemize}
+We will see some of these in the exercise
+\end{frame}
+
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
+
+
+\begin{frame}[fragile]
+\frametitle{References}
+
+
+\begin{itemize}
+\item The examples are adapted from
+  \url{https://spark.apache.org/docs/latest/}
+\item More models of the library can be found 
+ \url{https://spark.apache.org/docs/latest/api/scala/}
+ \url{https://spark.apache.org/docs/latest/api/java/}
+
+\end{itemize}
+
+
+\end{frame}
+
+%-------------------------------------------------------------------
+%-------------------------------------------------------------------
 
 
 \end{document}

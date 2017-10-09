@@ -209,7 +209,7 @@ learning context, features have to be fixed by the programmers.
 
 For the ease of illustration, we use a vector of hash codes derived
 from the words appearing in the tweet.  Consider the following source
-code in {\tt src/main/scala/TweetSVMFilter.scala} 
+code in \\ {\tt src/main/scala/TweetSVMFilter.scala} 
 
 \begin{code}
 object TweetSVMFilter {
@@ -260,7 +260,7 @@ object TweetSVMFilter {
     val test = splits(1)
 
     // Run training algorithm to build the model
-    val numIterations = 100
+    val numIterations = 10
     val model = SVMWithSGD.train(training, numIterations)
 
     // Clear the default threshold.
@@ -288,7 +288,55 @@ a size {\tt size}. If the size of the input
 list exceeds the given size, it truncates the input list down to the size.
 If the size of the input falls below {\tt size}, it pads the remaining spaces with zeros.
 This is to ensure all vectors to the SVM have the same size.
-In the {\tt main} function, we first load the labeled data from the HDFS.
+In the {\tt main} function, we first load the labeled data from the
+HDFS. We construct the labeled points from the input data. Note that
+the vector in a labeled point is constructed from the input text by
+taking the first 30 words from the text and converting each word into
+a hash code. In the following steps, we combine the positive and the negative labeled
+points. By randomly split the labeled points into two sets, namely 60\% for
+the model construction and 40\% for the testing.
+
+\begin{enumerate}
+\item Before running the code, we need to make sure the folders are created and the data are copied into HDFS.
+\begin{code}
+$ hdfs dfs -mkdir -p /data/
+$ hdfs dfs -rm -r /output
+$ hdfs dfs -rm -r /data/tweet
+$ hdfs dfs -put ~/git/scala-bigdata-starter/spark-ml-examples/\
+data/tweet /data/
+\end{code}
+
+
+\item To compile
+\begin{code}
+$ sbt package
+\end{code}
+%$
+
+
+\item To execute 
+\begin{code}
+$ /opt/spark-1.5.2-bin-hadoop2-hive2-r/bin/spark-submit --class TweetSVMFilter\ 
+target/scala-2.10/spark-ml-examples_2.10-0.1.jar
+\end{code}
+%$
+We will observe the output
+\begin{code}
+Area under ROC = 0.5517569981668705
+\end{code}
+
+\end{enumerate}
+
+\subsection{Exercises}
+
+The accuracy of the above SVM model is not very high. Using
+  invidiual word as feature might not be a good idea. 
+\begin{itemize}
+ \item Instead of using single word, try to use 2-gram and 3-gram
+   phases as features. 
+\item Instead of taking all the 2-gram (or 3-gram) phases, we can run
+  TF-IDF to select input key phrases as features.
+\end{itemize}
 
 
 \end{document}
